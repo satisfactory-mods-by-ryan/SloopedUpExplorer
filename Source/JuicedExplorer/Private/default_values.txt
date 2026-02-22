@@ -1,0 +1,117 @@
+========== MOVEMENT COMPONENT DEFAULT VALUES ==========
+Engine.MaxTorque: 300.000000
+Engine.MaxRPM: 9000.000000
+Engine.EngineIdleRPM: 1000.000000
+Engine.EngineBrakeEffect: 0.200000
+Engine.EngineRevUpMOI: 0.600000
+Engine.EngineRevDownRate: 2500.000000
+Engine.TorqueCurve has 5 keys:
+  [1000.0 RPM] -> 0.600 torque multiplier
+  [4000.0 RPM] -> 0.880 torque multiplier
+  [6000.0 RPM] -> 1.000 torque multiplier
+  [8200.0 RPM] -> 0.950 torque multiplier
+  [9000.0 RPM] -> 0.850 torque multiplier
+Differential.Type: 1
+Differential.FrontRearSplit: 0.600000
+Transmission.ChangeUpRPM: 8500.000000
+Transmission.ChangeDownRPM: 4000.000000
+Transmission.GearChangeTime: 0.140000
+Transmission.TransmissionEfficiency: 0.950000
+Transmission.FinalRatio: 11.500000
+Transmission.GearCount: 6
+  Gear 1 Ratio: 3.760000
+  Gear 2 Ratio: 2.270000
+  Gear 3 Ratio: 1.650000
+  Gear 4 Ratio: 1.190000
+  Gear 5 Ratio: 1.000000
+  Gear 6 Ratio: 0.780000
+Steering.SteeringType: 2
+Steering.AngleRatio: 0.600000
+Steering.SteeringCurve has 5 keys:
+  [0.0 speed] -> 0.850 angle multiplier
+  [27.0 speed] -> 0.570 angle multiplier
+  [48.1 speed] -> 0.398 angle multiplier
+  [75.0 speed] -> 0.250 angle multiplier
+  [120.0 speed] -> 0.200 angle multiplier
+Vehicle.Mass: 500.000000
+Vehicle.DragCoefficient: 0.300000
+Vehicle.DownforceCoefficient: 1.000000
+Vehicle.ChassisWidth: 300.000000
+Vehicle.ChassisHeight: 220.000000
+Vehicle.InertiaTensorScale: X=1.000 Y=1.000 Z=1.000
+Vehicle.SleepThreshold: 0.000000
+Vehicle.SleepSlopeLimit: 0.866000
+Vehicle.mHandbrakeSideSlipMultiplier: 0.550000
+Vehicle.mSurfaceWheelForceMultiplierOverrides Count: 0
+WheelSetup Count: 4
+  WheelSetup[0] BoneName: physwheel_front_l
+  WheelSetup[1] BoneName: physwheel_front_r
+  WheelSetup[2] BoneName: physwheel_back_l
+  WheelSetup[3] BoneName: physwheel_back_r
+========================================================
+========== WHEEL DEFAULT VALUES ==========
+--- FRONT Wheel ---
+  Offset: 0.000000, 0.000000, 0.000000
+  WheelRadius: 69.000000
+  WheelWidth: 66.000000
+  WheelMass: 20.000000
+  CorneringStiffness: 500.000000
+  FrictionForceMultiplier: 5.000000
+  SideSlipModifier: 1.000000
+  SlipThreshold: 5554.000000
+  SkidThreshold: 2777.780029
+  MaxSteerAngle: 40.000000
+  bAffectedBySteering: 1
+  bAffectedByBrake: 1
+  bAffectedByHandbrake: 0
+  bAffectedByEngine: 1
+  bABSEnabled: 1
+  bTractionControlEnabled: 0
+  MaxWheelspinRotation: 30.000000
+  ExternalTorqueCombineMethod: 2
+  SuspensionMaxRaise: 35.000000
+  SuspensionMaxDrop: 35.000000
+  SuspensionDampingRatio: 0.850000
+  WheelLoadRatio: 1.000000
+  SpringRate: 25.000000
+  SpringPreload: 1000.000000
+  SuspensionSmoothing: 0.000000
+  RollbarScaling: 0.200000
+  SweepShape: 0
+  SweepType: 0
+  MaxBrakeTorque: 3500.000000
+  MaxHandBrakeTorque: 7500.000000
+  LateralSlipGraph: EMPTY (no curve defined)
+--- REAR Wheel ---
+  Offset: 0.000000, 0.000000, 0.000000
+  WheelRadius: 56.000000
+  WheelWidth: 66.000000
+  WheelMass: 20.000000
+  CorneringStiffness: 500.000000
+  FrictionForceMultiplier: 4.850000
+  SideSlipModifier: 1.000000
+  SlipThreshold: 5554.000000
+  SkidThreshold: 2777.780029
+  MaxSteerAngle: 40.000000
+  bAffectedBySteering: 0
+  bAffectedByBrake: 0
+  bAffectedByHandbrake: 1
+  bAffectedByEngine: 1
+  bABSEnabled: 0
+  bTractionControlEnabled: 0
+  MaxWheelspinRotation: 30.000000
+  ExternalTorqueCombineMethod: 2
+  SuspensionMaxRaise: 45.000000
+  SuspensionMaxDrop: 60.000000
+  SuspensionDampingRatio: 0.800000
+  WheelLoadRatio: 1.000000
+  SpringRate: 25.000000
+  SpringPreload: 1000.000000
+  SuspensionSmoothing: 0.000000
+  RollbarScaling: 0.150000
+  SweepShape: 0
+  SweepType: 0
+  MaxBrakeTorque: 1500.000000
+  MaxHandBrakeTorque: 10000.000000
+  LateralSlipGraph: EMPTY (no curve defined)
+========== END WHEEL DEFAULT VALUES ==========
