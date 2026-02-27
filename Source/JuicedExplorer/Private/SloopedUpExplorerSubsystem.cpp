@@ -302,6 +302,9 @@ void ASloopedUpExplorerSubsystem::TuneExplorerWheelCDO(UFGWheeledVehicleMovement
 						FKeyHandle fKey5 = frontLateralSlipCurve->AddKey(75.0f, 150.0f);
 						frontLateralSlipCurve->SetKeyInterpMode(fKey5, RCIM_Cubic);
 					}
+
+					wheelCDO->MaxHandBrakeTorque = 0.0f;
+
 				} else if (wheelCDO->AxleType == EAxleType::Rear) {
 					// Rear wheel lateral slip graph:
 					// - Strong low-angle grip for normal driving and traction
