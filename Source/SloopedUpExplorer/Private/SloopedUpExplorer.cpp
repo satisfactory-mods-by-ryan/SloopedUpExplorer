@@ -13,9 +13,11 @@ void FSloopedUpExplorerModule::StartupModule() {
 
 	SUBSCRIBE_METHOD_VIRTUAL(UFGWheeledVehicleMovementComponent::SetupVehicle, wvmc, [this](auto& scope, UFGWheeledVehicleMovementComponent* self, TUniquePtr<Chaos::FSimpleWheeledVehicle>& PVehicle) {
 		ASloopedUpExplorerSubsystem* sloopedUpExplorerSubsystem = ASloopedUpExplorerSubsystem::Get(self->GetWorld());
-		if (sloopedUpExplorerSubsystem) {
-			sloopedUpExplorerSubsystem->TuneExplorer(self);
-			sloopedUpExplorerSubsystem->SwapExplorerWheels(self);
+		if (sloopedUpExplorerSubsystem && IsValid(sloopedUpExplorerSubsystem)) {
+			if (sloopedUpExplorerSubsystem->ShouldTuneVehicle(self)) {
+				sloopedUpExplorerSubsystem->TuneExplorer(self);
+				sloopedUpExplorerSubsystem->SwapExplorerWheels(self);
+			}
 		}
 		scope(self, PVehicle);
 	});

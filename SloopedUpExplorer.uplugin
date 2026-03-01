@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0.0",
+	"VersionName": "1.0.1",
 	"FriendlyName": "Slooped Up Explorer",
-	"Description": "Makes the explorer go vroom.",
+	"Description": "Significantly boosts Explorer speed and handling",
 	"Category": "Modding",
 	"CreatedBy": "Ryan",
 	"CreatedByURL": "https://ficsit.app/user/6CFnDcDHq3Cwf7",
@@ -21,7 +21,7 @@
 			"SemVersion": "^3.11.3"
 		}
 	],
-	"SemVersion": "1.0.0",
+	"SemVersion": "1.0.1",
 	"GameVersion": ">=455399",
 	"Modules": [
 		{

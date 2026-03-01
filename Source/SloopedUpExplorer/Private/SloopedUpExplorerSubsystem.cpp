@@ -26,11 +26,13 @@ ASloopedUpExplorerSubsystem* ASloopedUpExplorerSubsystem::Get(UWorld* world) {
 
 void ASloopedUpExplorerSubsystem::BeginPlay() {
 	Super::BeginPlay();
-	FSoftClassPath FrontClassPath("/Script/Engine.BlueprintGeneratedClass'/SloopedUpExplorer/Wheels/SloopedUpExplorer_FrontWheel.SloopedUpExplorer_FrontWheel_C'");
-	FSoftClassPath RearClassPath("/Script/Engine.BlueprintGeneratedClass'/SloopedUpExplorer/Wheels/SloopedUpExplorer_RearWheel.SloopedUpExplorer_RearWheel_C'");
-	FrontWheelClass = FrontClassPath.TryLoadClass<UChaosVehicleWheel>();
-	RearWheelClass = RearClassPath.TryLoadClass<UChaosVehicleWheel>();
-	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Loaded wheel classes"));
+
+	// Log what wheel classes are configured
+	if (FrontWheelClass && RearWheelClass) {
+		UE_LOG(LogSloopedUpExplorer, Log, TEXT("Wheel classes configured: Front=%s, Rear=%s"), *FrontWheelClass->GetName(), *RearWheelClass->GetName());
+	} else {
+		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Wheel classes NOT configured! Front=%s, Rear=%s. Make sure to use the Blueprint subsystem child class!"), FrontWheelClass ? TEXT("OK") : TEXT("NULL"), RearWheelClass ? TEXT("OK") : TEXT("NULL"));
+	}
 }
 
 void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
@@ -40,7 +42,8 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 	if (!HasAuthority()) {
 		return;
 	}
-	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Tuning Explorer movement component"));
+
+	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Tuning Explorer movement component for %s"), *vehicleMovementComponent->GetOwner()->GetName());
 
 	// VEHICLE SETUP
 
@@ -84,33 +87,48 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 
 void ASloopedUpExplorerSubsystem::SwapExplorerWheels(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
 	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
-		return;
-	}
-	if (!FrontWheelClass || !RearWheelClass) {
-		UE_LOG(LogSloopedUpExplorer, Warning, TEXT("Cannot swap Explorer wheels because wheel classes failed to load"));
+		UE_LOG(LogSloopedUpExplorer, Warning, TEXT("SwapExplorerWheels: Invalid vehicle movement component"));
 		return;
 	}
 	if (!HasAuthority()) {
 		return;
 	}
-	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Swapping Explorer wheels"));
+	if (!FrontWheelClass || !RearWheelClass) {
+		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Cannot swap Explorer wheels - wheel classes not configured (Front=%s, Rear=%s) for %s"), FrontWheelClass ? TEXT("OK") : TEXT("NULL"), RearWheelClass ? TEXT("OK") : TEXT("NULL"), *vehicleMovementComponent->GetOwner()->GetName());
+		return;
+	}
+	if (!FrontWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass()) || !RearWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass())) {
+		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Configured wheel classes are not valid UChaosVehicleWheel subclasses!"));
+		return;
+	}
+
+	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Swapping Explorer wheels for %s"), *vehicleMovementComponent->GetOwner()->GetName());
 
 	// WHEEL SETUP
 
 	for (int32 i = 0; i < vehicleMovementComponent->WheelSetups.Num(); i++) {
 		FChaosWheelSetup& wheelSetup = vehicleMovementComponent->WheelSetups[i];
-		if (wheelSetup.WheelClass) {
-			UChaosVehicleWheel* originalCDO = Cast<UChaosVehicleWheel>(wheelSetup.WheelClass->GetDefaultObject());
-			if (originalCDO) {
-				FChaosWheelSetup newSetup = wheelSetup;
-				if (originalCDO->AxleType == EAxleType::Front) {
-					newSetup.WheelClass = FrontWheelClass;
-				} else if (originalCDO->AxleType == EAxleType::Rear) {
-					newSetup.WheelClass = RearWheelClass;
-				}
-				vehicleMovementComponent->WheelSetups[i] = newSetup;
-			}
+		// Validate wheel class exists
+		if (!wheelSetup.WheelClass || !IsValid(wheelSetup.WheelClass)) {
+			UE_LOG(LogSloopedUpExplorer, Warning, TEXT("WheelSetup[%d] has invalid WheelClass, skipping"), i);
+			continue;
 		}
+		// Get the default object
+		UChaosVehicleWheel* originalCDO = Cast<UChaosVehicleWheel>(wheelSetup.WheelClass->GetDefaultObject());
+		if (!originalCDO || !IsValid(originalCDO)) {
+			UE_LOG(LogSloopedUpExplorer, Warning, TEXT("WheelSetup[%d] has invalid CDO, skipping"), i);
+			continue;
+		}
+		// Swap based on axle type
+		FChaosWheelSetup newSetup = wheelSetup;
+		if (originalCDO->AxleType == EAxleType::Front) {
+			newSetup.WheelClass = FrontWheelClass;
+			UE_LOG(LogSloopedUpExplorer, Verbose, TEXT("Swapped front wheel at index %d"), i);
+		} else if (originalCDO->AxleType == EAxleType::Rear) {
+			newSetup.WheelClass = RearWheelClass;
+			UE_LOG(LogSloopedUpExplorer, Verbose, TEXT("Swapped rear wheel at index %d"), i);
+		}
+		vehicleMovementComponent->WheelSetups[i] = newSetup;
 	}
 }
 
@@ -122,7 +140,7 @@ void ASloopedUpExplorerSubsystem::BounceFrontHydraulics(UFGWheeledVehicleMovemen
 	if (!primComp) {
 		return;
 	}
-
+	// Apply an upward impulse at the front wheels to bounce the front of the Explorer
 	FVector forwardVector = primComp->GetForwardVector();
 	FVector frontOffset = forwardVector * 150.0f;
 	primComp->AddImpulseAtLocation(FVector::UpVector * impulseStrength, primComp->GetComponentLocation() + frontOffset, NAME_None);
