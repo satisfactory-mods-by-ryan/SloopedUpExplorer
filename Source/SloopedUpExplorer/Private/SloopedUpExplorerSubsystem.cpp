@@ -35,11 +35,16 @@ void ASloopedUpExplorerSubsystem::BeginPlay() {
 	}
 }
 
-void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
+void ASloopedUpExplorerSubsystem::TuneExplorer_Implementation(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
 	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
 		return;
 	}
-	if (!HasAuthority()) {
+	if (!FrontWheelClass || !RearWheelClass) {
+		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Cannot swap Explorer wheels - wheel classes not configured (Front=%s, Rear=%s) for %s"), FrontWheelClass ? TEXT("OK") : TEXT("NULL"), RearWheelClass ? TEXT("OK") : TEXT("NULL"), *vehicleMovementComponent->GetOwner()->GetName());
+		return;
+	}
+	if (!FrontWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass()) || !RearWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass())) {
+		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Configured wheel classes are not valid UChaosVehicleWheel subclasses!"));
 		return;
 	}
 
@@ -48,7 +53,7 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 	// VEHICLE SETUP
 
 	vehicleMovementComponent->Mass = 700.0f;
-	vehicleMovementComponent->CenterOfMassOverride = FVector(5.0f, 0.0f, -20.0f);
+	vehicleMovementComponent->CenterOfMassOverride = FVector(5.0f, 0.0f, -10.0f);
 
 	vehicleMovementComponent->DownforceCoefficient = 0.9f;
 
@@ -83,26 +88,6 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 		FKeyHandle key5 = steeringCurve->AddKey(180.0f, 0.10f);
 		steeringCurve->SetKeyInterpMode(key5, RCIM_Cubic);
 	}
-}
-
-void ASloopedUpExplorerSubsystem::SwapExplorerWheels(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
-	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
-		UE_LOG(LogSloopedUpExplorer, Warning, TEXT("SwapExplorerWheels: Invalid vehicle movement component"));
-		return;
-	}
-	if (!HasAuthority()) {
-		return;
-	}
-	if (!FrontWheelClass || !RearWheelClass) {
-		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Cannot swap Explorer wheels - wheel classes not configured (Front=%s, Rear=%s) for %s"), FrontWheelClass ? TEXT("OK") : TEXT("NULL"), RearWheelClass ? TEXT("OK") : TEXT("NULL"), *vehicleMovementComponent->GetOwner()->GetName());
-		return;
-	}
-	if (!FrontWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass()) || !RearWheelClass->IsChildOf(UChaosVehicleWheel::StaticClass())) {
-		UE_LOG(LogSloopedUpExplorer, Error, TEXT("Configured wheel classes are not valid UChaosVehicleWheel subclasses!"));
-		return;
-	}
-
-	UE_LOG(LogSloopedUpExplorer, Log, TEXT("Swapping Explorer wheels for %s"), *vehicleMovementComponent->GetOwner()->GetName());
 
 	// WHEEL SETUP
 
