@@ -21,7 +21,8 @@ public:
 
 	// Modifies all relevant parameters for the Explorer to give it a more powerful, stable,
 	// and responsive feel, while still being drivable and not too overpowered
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "SloopedUpExplorer")
+	// This function must be called locally on each machine (not via RPC)
+	UFUNCTION(BlueprintCallable, Category = "SloopedUpExplorer")
 	void TuneExplorer(UFGWheeledVehicleMovementComponent* vehicleMovementComponent);
 
 	// Bounce the front of the Explorer by applying an upward impulse at the front wheels

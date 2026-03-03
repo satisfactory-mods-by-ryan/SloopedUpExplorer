@@ -35,7 +35,7 @@ void ASloopedUpExplorerSubsystem::BeginPlay() {
 	}
 }
 
-void ASloopedUpExplorerSubsystem::TuneExplorer_Implementation(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
+void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
 	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
 		return;
 	}
@@ -114,6 +114,12 @@ void ASloopedUpExplorerSubsystem::TuneExplorer_Implementation(UFGWheeledVehicleM
 			UE_LOG(LogSloopedUpExplorer, Verbose, TEXT("Swapped rear wheel at index %d"), i);
 		}
 		vehicleMovementComponent->WheelSetups[i] = newSetup;
+	}
+
+	// Recreate the physics state to apply wheel changes
+	if (UPrimitiveComponent* primComp = Cast<UPrimitiveComponent>(vehicleMovementComponent->UpdatedComponent)) {
+		primComp->RecreatePhysicsState();
+		UE_LOG(LogSloopedUpExplorer, Log, TEXT("Recreated physics state for %s"), *vehicleMovementComponent->GetOwner()->GetName());
 	}
 }
 
