@@ -55,12 +55,13 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 	vehicleMovementComponent->Mass = 700.0f;
 	vehicleMovementComponent->CenterOfMassOverride = FVector(5.0f, 0.0f, -10.0f);
 
+	vehicleMovementComponent->mHandbrakeSideSlipMultiplier = 0.7f;
 	vehicleMovementComponent->DownforceCoefficient = 0.9f;
 
 	// ENGINE CONFIG
 
 	FVehicleEngineConfig& engineConfig = vehicleMovementComponent->EngineSetup;
-	engineConfig.MaxTorque = 575.0f;
+	engineConfig.MaxTorque = 600.0f;
 	engineConfig.EngineRevDownRate = 50.0f;
 
 	// TRANSMISSION CONFIG
@@ -123,16 +124,48 @@ void ASloopedUpExplorerSubsystem::TuneExplorer(UFGWheeledVehicleMovementComponen
 	}
 }
 
-void ASloopedUpExplorerSubsystem::BounceFrontHydraulics(UFGWheeledVehicleMovementComponent* vehicleMovementComponent, float impulseStrength) {
+bool ASloopedUpExplorerSubsystem::BounceFrontHydraulics(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
 	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
-		return;
+		return false;
 	}
 	UPrimitiveComponent* primComp = Cast<UPrimitiveComponent>(vehicleMovementComponent->UpdatedComponent);
 	if (!primComp) {
-		return;
+		return false;
 	}
 	// Apply an upward impulse at the front wheels to bounce the front of the Explorer
+	const float impulseStrength = 220000.0f;
 	FVector forwardVector = primComp->GetForwardVector();
 	FVector frontOffset = forwardVector * 150.0f;
 	primComp->AddImpulseAtLocation(FVector::UpVector * impulseStrength, primComp->GetComponentLocation() + frontOffset, NAME_None);
+	return true;
+}
+
+bool ASloopedUpExplorerSubsystem::Unstuck(UFGWheeledVehicleMovementComponent* vehicleMovementComponent) {
+	if (!vehicleMovementComponent || !IsValid(vehicleMovementComponent)) {
+		return false;
+	}
+	UPrimitiveComponent* primComp = Cast<UPrimitiveComponent>(vehicleMovementComponent->UpdatedComponent);
+	if (!primComp) {
+		return false;
+	}
+	// Some wheels must be off the ground (at least 2 out of 4)
+	const bool bWheelsInAir = vehicleMovementComponent->mNumWheelsOnGround <= 2;
+	// Vehicle must not be moving
+	const FVector velocity = primComp->GetPhysicsLinearVelocity();
+	const float speedThreshold = 27.78f; // cm/s (~1 km/h)
+	const bool bNotMoving = velocity.Size() < speedThreshold;
+	// Vehicle must not be rotating
+	const FVector angularVelocity = primComp->GetPhysicsAngularVelocityInRadians();
+	const float angularThreshold = 0.1f; // radians/sec
+	const bool bNotRotating = angularVelocity.Size() < angularThreshold;
+	// Check conditions
+	if (!bWheelsInAir || !bNotMoving || !bNotRotating) {
+		return false;
+	}
+	// Apply unstuck impulse
+	const float impulseStrength = 200000.0f;
+	float randomAngle = FMath::FRandRange(0.0f, 2.0f * PI);
+	FVector randomDirection = FVector(0.5f * FMath::Cos(randomAngle), 0.5f * FMath::Sin(randomAngle), 1.0f).GetSafeNormal();
+	primComp->AddImpulse(randomDirection * impulseStrength, NAME_None);
+	return true;
 }
